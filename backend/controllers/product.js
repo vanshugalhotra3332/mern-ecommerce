@@ -39,5 +39,45 @@ const updateProduct = async (req, res) => {
     product,
   });
 };
+// Delete Product --> Admin
 
-module.exports = { getAllProducts, createProduct, updateProduct };
+const deleteProduct = async (req, res) => {
+  let product = await Product.findById(req.params.id);
+  if (!product) {
+    return res.status(500).json({
+      success: false,
+      message: "Product not found!",
+    });
+  }
+  await product.remove();
+
+  res.status(200).json({
+    success: true,
+    product,
+    message: "Product deleted Successfully!",
+  });
+};
+
+// Get single product
+
+const getProductDetails = async (req, res, next) => {
+  let product = await Product.findById(req.params.id);
+  if (!product) {
+    return res.status(500).json({
+      success: false,
+      message: "Product not found!",
+    });
+  }
+  res.status(200).json({
+    success: true,
+    product,
+  });
+};
+
+module.exports = {
+  getAllProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  getProductDetails,
+};
