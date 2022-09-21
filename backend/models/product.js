@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Please Enter product name"],
+    required: [true, "Please Enter product name"], // if not provided then 2nd value will be error msg
     trim: true,
   },
   description: {

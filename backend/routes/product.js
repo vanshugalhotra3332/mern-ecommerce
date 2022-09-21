@@ -9,8 +9,11 @@ const {
 
 const router = express.Router();
 
+
+//* CREATING API Endpoints
+
 // GET --> /api/v1/products
-router.route("/products").get(getAllProducts);
+router.route("/products").get(getAllProducts); 
 
 // POST --> /api/v1/product/new
 router.route("/product/new").post(createProduct);

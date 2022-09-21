@@ -1,9 +1,10 @@
 const Product = require("../models/product");
+const { NotFoundError, CustomAPIError } = require("../errors/index");
 
 // * Create Product --> Admin
 
 const createProduct = async (req, res, next) => {
-  const product = await Product.create(req.body);
+  const product = await Product.create(req.body); // create new product from parameters recieved through request body
 
   res.status(200).json({
     success: true,
@@ -14,25 +15,23 @@ const createProduct = async (req, res, next) => {
 // Get All Products
 
 const getAllProducts = async (req, res) => {
-  const products = await Product.find();
+  const products = await Product.find(); // finding all the products
   res.status(200).json({ success: true, products });
 };
 
 // Update Product --> Admin
 
-const updateProduct = async (req, res) => {
-  let product = await Product.findById(req.params.id);
+const updateProduct = async (req, res, next) => {
+  let product = await Product.findById(req.params.id); // finding the product based on id passed as url parameter
   if (!product) {
-    return res.status(500).json({
-      success: false,
-      message: "Product not found!",
-    });
+    // if product not found then throw error
+    next(new NotFoundError(`No product with id: ${req.params.id}`));
   }
   product = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
     useFindAndModify: true,
-  });
+  }); // updating the product
 
   res.status(200).json({
     success: true,
@@ -41,13 +40,10 @@ const updateProduct = async (req, res) => {
 };
 // Delete Product --> Admin
 
-const deleteProduct = async (req, res) => {
+const deleteProduct = async (req, res, next) => {
   let product = await Product.findById(req.params.id);
   if (!product) {
-    return res.status(500).json({
-      success: false,
-      message: "Product not found!",
-    });
+    next(new NotFoundError(`No product with id: ${req.params.id}`));
   }
   await product.remove();
 
