@@ -1,4 +1,7 @@
 const express = require("express");
+
+require('express-async-errors'); // our error handler, 
+
 const app = express();
 
 const errorHandlerMiddleware = require("./middleware/errorHandler");

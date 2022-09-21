@@ -25,7 +25,7 @@ const updateProduct = async (req, res, next) => {
   let product = await Product.findById(req.params.id); // finding the product based on id passed as url parameter
   if (!product) {
     // if product not found then throw error
-    next(new NotFoundError(`No product with id: ${req.params.id}`));
+    throw new NotFoundError(`No product with id: ${req.params.id}`);
   }
   product = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -43,7 +43,7 @@ const updateProduct = async (req, res, next) => {
 const deleteProduct = async (req, res, next) => {
   let product = await Product.findById(req.params.id);
   if (!product) {
-    next(new NotFoundError(`No product with id: ${req.params.id}`));
+    throw new NotFoundError(`No product with id: ${req.params.id}`);
   }
   await product.remove();
 
@@ -59,10 +59,7 @@ const deleteProduct = async (req, res, next) => {
 const getProductDetails = async (req, res, next) => {
   let product = await Product.findById(req.params.id);
   if (!product) {
-    return res.status(500).json({
-      success: false,
-      message: "Product not found!",
-    });
+    throw new NotFoundError(`No product with id: ${req.params.id}`);
   }
   res.status(200).json({
     success: true,
