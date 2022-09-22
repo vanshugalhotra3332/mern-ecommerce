@@ -1,5 +1,6 @@
 const Product = require("../models/product");
 const { NotFoundError, CustomAPIError } = require("../errors/index");
+const ApiFeatures = require("../utils/apiFeatures");
 
 // * Create Product --> Admin
 
@@ -15,7 +16,10 @@ const createProduct = async (req, res, next) => {
 // Get All Products
 
 const getAllProducts = async (req, res) => {
-  const products = await Product.find(); // finding all the products
+  const apiFeature = new ApiFeatures(req.query);
+  const queryObject = apiFeature.search().filter().queryObject;
+
+  const products = await Product.find(queryObject); // finding all the products
   res.status(200).json({ success: true, products });
 };
 
