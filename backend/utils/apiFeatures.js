@@ -65,13 +65,23 @@ class ApiFeatures {
         // value consists: 50, 3 ...
         if (options.includes(field)) {
           let obj = {};
-          obj[field] = { [operator]: Number(value) }; 
+          obj[field] = { [operator]: Number(value) };
           this.queryObject.$and.push(obj); // appending the filter to the query object
         }
       });
     }
 
     return this;
+  }
+
+  pagination(resultPerPage) {
+    const currentPage = Number(this.urlQueryObj.page) || 1;
+
+    // skip means how many products we want to skip for showing on a particular page
+    // for example if have got 50 products and resultsPerPage is 10, so to go on page 2 I need to skip 10 products cuz 2nd page starts from product 11,
+
+    const skip = resultPerPage * (currentPage - 1);
+    return skip;
   }
 }
 

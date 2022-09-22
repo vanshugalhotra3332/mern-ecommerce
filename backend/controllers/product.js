@@ -16,10 +16,15 @@ const createProduct = async (req, res, next) => {
 // Get All Products
 
 const getAllProducts = async (req, res) => {
-  const apiFeature = new ApiFeatures(req.query);
-  const queryObject = apiFeature.search().filter().queryObject;
+  const resultPerPage = 2;
 
-  const products = await Product.find(queryObject); // finding all the products
+  const apiFeature = new ApiFeatures(req.query).search().filter();
+  const queryObject = apiFeature.queryObject;
+  const skip = apiFeature.pagination(resultPerPage);
+
+  const products = await Product.find(queryObject)
+    .limit(resultPerPage)
+    .skip(skip); // finding all the products that matches the queryObject parameters and limiting it
   res.status(200).json({ success: true, products });
 };
 
