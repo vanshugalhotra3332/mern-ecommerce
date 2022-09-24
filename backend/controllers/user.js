@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const StatusCodes = require("http-status-codes");
+const crypto = require("crypto");
 const {
   BadRequestError,
   UnauthenticatedError,
@@ -27,6 +28,8 @@ const registerUser = async (req, res) => {
 
   sendToken(user, StatusCodes.CREATED, res);
 };
+
+// Login user
 
 const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
@@ -73,13 +76,13 @@ const forgotPassword = async (req, res, next) => {
 
   // get reset password token
 
-  const resetToken = user.getResetPasswordToken();
+  const resetToken = await user.getResetPasswordToken();
 
   await user.save({ validateBeforeSave: false }); // saving the user
 
-  const resetPasswordUrl = `${req.protocol}//${req.get(
+  const resetPasswordUrl = `${req.protocol}://${req.get(
     "host"
-  )}/api/v1/passwordS/forgot/${resetToken}`;
+  )}/api/v1/password/reset/${resetToken}`;
 
   const message = `Reset Your password by clicking on following link: -\n\n\n ${resetPasswordUrl}\n\n If you have not requested this email then please ignore it `;
 
@@ -105,4 +108,43 @@ const forgotPassword = async (req, res, next) => {
   }
 };
 
-module.exports = { registerUser, loginUser, Logout, forgotPassword };
+const resetPassword = async (req, res, next) => {
+  // hashing so that we can match this with the one stored in user model
+  const tokenCrypto = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    tokenCrypto,
+    resetPasswordExpire: { $gt: Date.now() }, // checking if resetToken is not expired
+  });
+
+  if (!user) {
+    throw new BadRequestError(
+      "Reset Password Token is invalid or has been expired"
+    );
+  }
+
+  if (req.body.password !== req.body.confirmPassword) {
+    throw new BadRequestError("Password does not matched");
+  }
+
+  user.password = req.body.password; // we dont need to explicitly hash it again and then save it, our user model has a function that does the same for us, userSchema.pre
+
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  await user.save();
+
+  // sending token means loggin in
+  sendToken(user, StatusCodes.OK, res);
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  Logout,
+  forgotPassword,
+  resetPassword,
+};
