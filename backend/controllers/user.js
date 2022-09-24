@@ -9,6 +9,7 @@ const {
 } = require("../errors/index");
 const sendToken = require("../utils/jwtToken");
 const sendEmail = require("../utils/sendEmail");
+const { stat } = require("fs");
 
 // Register User
 
@@ -141,10 +142,44 @@ const resetPassword = async (req, res, next) => {
   sendToken(user, StatusCodes.OK, res);
 };
 
+// get user details
+const getUserDetails = async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    user,
+  });
+};
+
+// update password
+const updatePassword = async (req, res, next) => {
+  const user = await User.findById(req.user.id).select("+password");
+
+  const isPasswordMatch = await user.comparePassword(req.body.oldPassword);
+
+  if (!isPasswordMatch) {
+    throw new UnauthenticatedError("Old Password is incorrect");
+  }
+
+  if (req.body.newPassword !== req.body.confirmPassword) {
+    throw new BadRequestError("Password does not matched");
+  }
+
+  user.password = req.body.newPassword;
+
+  await user.save();
+
+  // sending token for loggin in the user
+  sendToken(user, StatusCodes.OK, res);
+};
+
 module.exports = {
   registerUser,
   loginUser,
   Logout,
   forgotPassword,
   resetPassword,
+  getUserDetails,
+  updatePassword,
 };
