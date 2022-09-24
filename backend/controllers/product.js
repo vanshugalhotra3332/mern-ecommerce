@@ -1,6 +1,7 @@
 const Product = require("../models/product");
-const { NotFoundError, CustomAPIError } = require("../errors/index");
+const { NotFoundError } = require("../errors/index");
 const ApiFeatures = require("../utils/apiFeatures");
+const StatusCodes = require("http-status-codes");
 
 // * Create Product --> Admin
 
@@ -22,10 +23,17 @@ const getAllProducts = async (req, res) => {
   const queryObject = apiFeature.queryObject;
   const skip = apiFeature.pagination(resultPerPage);
 
+  const totalProducts = await Product.countDocuments();
+
   const products = await Product.find(queryObject)
     .limit(resultPerPage)
     .skip(skip); // finding all the products that matches the queryObject parameters and limiting it
-  res.status(200).json({ success: true, products });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    totalProducts,
+    shownProducts: products.length,
+    products,
+  });
 };
 
 // Update Product --> Admin
@@ -42,7 +50,7 @@ const updateProduct = async (req, res, next) => {
     useFindAndModify: true,
   }); // updating the product
 
-  res.status(200).json({
+  res.status(StatusCodes.OK).json({
     success: true,
     product,
   });
@@ -56,7 +64,7 @@ const deleteProduct = async (req, res, next) => {
   }
   await product.remove();
 
-  res.status(200).json({
+  res.status(StatusCodes.OK).json({
     success: true,
     product,
     message: "Product deleted Successfully!",
@@ -70,7 +78,7 @@ const getProductDetails = async (req, res, next) => {
   if (!product) {
     throw new NotFoundError(`No product with id: ${req.params.id}`);
   }
-  res.status(200).json({
+  res.status(StatusCodes.OK).json({
     success: true,
     product,
   });
