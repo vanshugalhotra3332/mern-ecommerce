@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const { UnauthenticatedError, UnauthorizedError } = require("../errors/index");
 const User = require("../models/user");
 
-const Authenticate = async (req, res, next) => {
+const isLoggedIn = async (req, res, next) => {
   const { token } = req.cookies; // accessing the token saved in cookies
 
   if (!token) {
@@ -28,4 +28,4 @@ const authorizeRole = (role) => {
   };
 };
 
-module.exports = { Authenticate, authorizeRole };
+module.exports = { isLoggedIn, authorizeRole };

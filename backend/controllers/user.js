@@ -174,6 +174,23 @@ const updatePassword = async (req, res, next) => {
   sendToken(user, StatusCodes.OK, res);
 };
 
+const updateProfile = async (req, res, next) => {
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+  };
+
+  const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+  });
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -182,4 +199,5 @@ module.exports = {
   resetPassword,
   getUserDetails,
   updatePassword,
+  updateProfile,
 };
