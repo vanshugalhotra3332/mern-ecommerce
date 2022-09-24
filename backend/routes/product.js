@@ -6,7 +6,7 @@ const {
   deleteProduct,
   getProductDetails,
 } = require("../controllers/product");
-const Authenticate = require("../middleware/authenticate");
+const { Authenticate, authorizeRole } = require("../middleware/authenticate");
 
 const router = express.Router();
 
@@ -16,13 +16,19 @@ const router = express.Router();
 router.route("/products").get(Authenticate, getAllProducts);
 
 // POST --> /api/v1/product/new
-router.route("/product/new").post(createProduct);
+router
+  .route("/product/new")
+  .post(Authenticate, authorizeRole("admin"), createProduct);
 
 // PATCH --> /api/v1/product/:id
-router.route("/product/:id").patch(updateProduct);
+router
+  .route("/product/:id")
+  .patch(Authenticate, authorizeRole("admin"), updateProduct);
 
 // DELETE --> /api/v1/product/:id
-router.route("/product/:id").delete(deleteProduct);
+router
+  .route("/product/:id")
+  .delete(Authenticate, authorizeRole("admin"), deleteProduct);
 
 // GET --> /api/v1/product/:id
 router.route("/product/:id").get(getProductDetails);

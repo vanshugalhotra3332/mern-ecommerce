@@ -6,6 +6,7 @@ const StatusCodes = require("http-status-codes");
 // * Create Product --> Admin
 
 const createProduct = async (req, res, next) => {
+  req.body.user = req.user.id;
   const product = await Product.create(req.body); // create new product from parameters recieved through request body
 
   res.status(200).json({
