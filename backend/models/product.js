@@ -58,6 +58,12 @@ const productSchema = new mongoose.Schema({
       comment: {
         type: String,
       },
+      
+      user: {
+        type: mongoose.Schema.ObjectId,
+        ref: "user",
+        required: true,
+      },
     },
   ],
 

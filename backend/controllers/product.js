@@ -85,10 +85,115 @@ const getProductDetails = async (req, res, next) => {
   });
 };
 
+// Create new review or update the review
+const createProductReview = async (req, res, next) => {
+  const { rating, comment, productId } = req.body;
+  const review = {
+    user: req.user.id,
+    name: req.user.name,
+    rating: Number(rating),
+    comment,
+  };
+
+  const product = await Product.findById(productId);
+
+  const isReviewed = product.reviews.find((rev) => {
+    return rev.user == req.user.id;
+  }); // == instead of === cuz we dont wanna match the datatype also
+
+  if (isReviewed) {
+    product.reviews.forEach((rev) => {
+      if (rev.user == req.user.id) {
+        (rev.rating = rating), (rev.comment = comment);
+      }
+    });
+  } else {
+    product.reviews.push(review);
+    product.numOfReviews = product.reviews.length;
+  }
+
+  // changing the product rating
+  let total_rating = 0;
+  product.reviews.forEach((eachReview) => {
+    total_rating += eachReview.rating;
+  });
+
+  product.rating = total_rating / product.reviews.length;
+
+  await product.save({ validateBeforeSave: false });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    product,
+  });
+};
+
+// Get all product reviews
+
+const getProductReviews = async (req, res) => {
+  const product = await Product.findById(req.query.productId);
+
+  if (!product) {
+    throw new NotFoundError(`No product with id: ${req.query.productId}`);
+  }
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    reviews: product.reviews,
+  });
+};
+
+// delete review
+const deleteReview = async (req, res) => {
+  const product = await Product.findById(req.query.productId);
+
+  if (!product) {
+    throw new NotFoundError(`No product with id: ${req.query.productId}`);
+  }
+
+  // getting every review to show, except for the one that is to be deleted
+  const reviews = product.reviews.filter((eachReview) => {
+    // every review in product.reviews array has its own unique id
+    return eachReview._id != req.query.reviewId;
+  });
+
+  // changing the product rating
+  let total_rating = 0;
+  reviews.forEach((eachReview) => {
+    total_rating += eachReview.rating;
+  });
+
+  const rating = total_rating / reviews.length;
+  const numOfReviews = reviews.length;
+
+  await Product.findByIdAndUpdate(
+    req.query.productId,
+    {
+      // passing the new data, which is changed when we deleted a review,
+      reviews,
+      rating, // overall rating of product
+      numOfReviews,
+    },
+    {
+      // extra options
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+  });
+};
+
 module.exports = {
   getAllProducts,
   createProduct,
   updateProduct,
   deleteProduct,
   getProductDetails,
+  createProductReview,
+  getProductReviews,
+  deleteReview,
 };
