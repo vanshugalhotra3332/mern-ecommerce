@@ -15,19 +15,21 @@ const router = express.Router();
 // GET --> /api/v1/products
 router.route("/products").get(isLoggedIn, getAllProducts);
 
-// POST --> /api/v1/product/new
+// GET --> /api/v1/product/:id
+router.route("/product/:id").get(getProductDetails);
+
+// -----------------------------ADMIN Routes ---------------------------------------------------------------
+
+// POST --> /api/v1/admin/product/new
 router
   .route("/admin/product/new")
   .post(isLoggedIn, authorizeRole("admin"), createProduct);
 
-// PATCH --> /api/v1/product/:id
-// DELETE --> /api/v1/product/:id
+// PATCH --> /api/v1/admin/product/:id
+// DELETE --> /api/v1/admin/product/:id
 router
   .route("/admin/product/:id")
   .patch(isLoggedIn, authorizeRole("admin"), updateProduct)
   .delete(isLoggedIn, authorizeRole("admin"), deleteProduct);
-
-// GET --> /api/v1/product/:id
-router.route("/product/:id").get(getProductDetails);
 
 module.exports = router;

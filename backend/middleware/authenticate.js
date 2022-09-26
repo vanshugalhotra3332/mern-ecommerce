@@ -18,10 +18,11 @@ const isLoggedIn = async (req, res, next) => {
 
 const authorizeRole = (role) => {
   return (req, res, next) => {
-    if (req.user.role !== role) {
+    const userRole = req.user ? req.user.role : "";
+    if (userRole !== role) {
       // if role of the user who sent request is not admin then we will throw error
       throw new UnauthorizedError(
-        `${req.user.role} is not allowed to access this resource`
+        `${userRole} is not allowed to access this resource`
       );
     }
     next(); // else we will pass the control to next middleware

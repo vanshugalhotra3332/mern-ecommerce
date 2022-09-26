@@ -10,6 +10,7 @@ const {
 const sendToken = require("../utils/jwtToken");
 const sendEmail = require("../utils/sendEmail");
 const { stat } = require("fs");
+const user = require("../models/user");
 
 // Register User
 
@@ -191,6 +192,64 @@ const updateProfile = async (req, res, next) => {
   });
 };
 
+// Admin route
+const getAllUsers = async (req, res, next) => {
+  const users = await User.find();
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    userCount: users.length,
+    users,
+  });
+};
+
+// Get single User (admin route)
+const getSingleUser = async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    throw new NotFoundError(`User with id: ${req.params.id} does not exist `);
+  }
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    user,
+  });
+};
+
+// admin route
+const updateRole = async (req, res, next) => {
+  const newUserData = {
+    role: req.body.role,
+  };
+
+  const user = await User.findByIdAndUpdate(req.params.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+  });
+};
+
+// admin route
+const deleteUser = async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    throw new NotFoundError(`User with id: ${req.params.id} does not exist `);
+  }
+
+  await user.remove();
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: "User deleted successfully!",
+  });
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -200,4 +259,8 @@ module.exports = {
   getUserDetails,
   updatePassword,
   updateProfile,
+  getAllUsers,
+  getSingleUser,
+  updateRole,
+  deleteUser,
 };
