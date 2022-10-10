@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import profileImage from "../../images/bigghost.jpg";
+import profileImage from "../../../images/bigghost.jpg";
 
-import Logo from "../../images/logo.webp";
+import Logo from "../../../images/logo.webp";
 import NavLink from "./NavLink";
 import NavLinkMobile from "./NavLinkMobile";
 
